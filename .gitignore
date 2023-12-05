@@ -14,4 +14,4 @@ Cargo.lock
 *.pdb
 
 # Don't check in puzzel input
-input.txt
+input*.txt
