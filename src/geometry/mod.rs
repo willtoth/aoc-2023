@@ -1,5 +1,6 @@
 pub mod bounding_box;
 pub mod circle;
+pub mod direction;
 pub mod grid2d;
 pub mod grid_draw;
 pub mod line;
@@ -20,6 +21,7 @@ pub trait Filled {}
 
 pub use crate::geometry::bounding_box::*;
 pub use crate::geometry::circle::*;
+pub use crate::geometry::direction::*;
 pub use crate::geometry::grid2d::*;
 pub use crate::geometry::line::*;
 pub use crate::geometry::point::*;

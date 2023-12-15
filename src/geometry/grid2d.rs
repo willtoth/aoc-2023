@@ -31,6 +31,12 @@ pub struct GridColIterator<'a, T: Copy + Clone> {
     col: i64,
 }
 
+// impl<'a, T: Copy + Clone> DoubleEndedIterator for GridColIterator<'a, T> {
+//     fn next_back(&mut self) -> Option<Self::Item> {
+//         todo!()
+//     }
+// }
+
 impl<'a, T: Copy + Clone> Iterator for GridColIterator<'a, T> {
     type Item = (Point<i64>, &'a T);
 
@@ -79,11 +85,18 @@ impl<'a, T: Copy + Clone> Iterator for GridIterator<'a, T> {
     }
 }
 
+#[derive(Clone)]
 pub struct Grid2d<T: Copy + Clone> {
     grid: Vec<Vec<T>>,
     coord_top_left: Point<i64>,
     pub default: T,
     bounds: Option<Rectangle<i64>>,
+}
+
+impl<T: Copy + Clone + PartialEq> Grid2d<T> {
+    pub fn grid_eq(&self, other: &Grid2d<T>) -> bool {
+        self.grid == other.grid
+    }
 }
 
 impl<T: Copy + Clone> Grid2d<T> {
@@ -94,6 +107,40 @@ impl<T: Copy + Clone> Grid2d<T> {
             default,
             bounds: None,
         }
+    }
+
+    pub fn rotate_ccw(&self) -> Grid2d<T> {
+        let rows = self.grid[0].len();
+        let cols = self.grid.len();
+        let mut result = Grid2d {
+            grid: vec![vec![self.default; rows]; cols],
+            coord_top_left: Point::new(0, 0), // TODO:Fix this?
+            default: self.default,
+            bounds: None, // TODO: Fix this
+        };
+
+        for (p, value) in self.iter() {
+            result.set_or_insert(p.y, cols as i64 - p.x, *value);
+        }
+
+        result
+    }
+
+    pub fn rotate_cw(&self) -> Grid2d<T> {
+        let rows = (self.max_x() - 1) as usize; //TODO: this whole lib is broken...
+        let cols = (self.max_y() - 1) as usize;
+        let mut result = Grid2d {
+            grid: vec![vec![self.default; rows]; cols],
+            coord_top_left: Point::new(0, 0), // TODO:Fix this?
+            default: self.default,
+            bounds: None, // TODO: Fix this
+        };
+
+        for (p, value) in self.iter() {
+            result.set_or_insert(rows as i64 - p.y, p.x, *value);
+        }
+
+        result
     }
 
     pub fn index(&self, x: i64, y: i64) -> Result<&T, ()> {
@@ -237,6 +284,14 @@ impl<T: Copy + Clone> Grid2d<T> {
 
         self.grid[(y - self.coord_top_left.y) as usize][(x - self.coord_top_left.x) as usize] =
             value
+    }
+
+    pub fn clear(&mut self) {
+        for row in self.grid.iter_mut() {
+            for ch in row.iter_mut() {
+                *ch = self.default;
+            }
+        }
     }
 }
 
